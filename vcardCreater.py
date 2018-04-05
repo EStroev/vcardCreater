@@ -2,7 +2,8 @@
 import os
 import csv
 import openpyxl
-import arg
+import argparse
+
 
 def xlsx_opener(inFile, title):
     inWB = openpyxl.load_workbook(inFile, read_only=True)
@@ -24,7 +25,7 @@ def load_data(ws):
                 'workEmail': cell[4].value,
                 'personalEmail': cell[5].value,
                 'company': cell[6].value,
-                'position': cell[7].value
+                'title': cell[7].value
             }
         )
 
@@ -56,7 +57,7 @@ def csv_parser(inputFile):
                     'workEmail': workEmail,
                     'personalEmail': personalEmail,
                     'company': company,
-                    'position': position
+                    'title': title
                 }
             )
 
@@ -71,11 +72,11 @@ PRODID:-//Apple Inc.//Mac OS X 10.13.3//EN
 N:{contact['surname']};{contact['name']};;;
 FN:{contact['name']} {contact['surname']}
 ORG:{contact['company']};
+TITLE:{contact['title']}
 EMAIL;type=INTERNET;type=WORK;type=pref:{contact['workEmail']}
 EMAIL;type=INTERNET;type=HOME:{contact['personalEmail']}
 TEL;type=CELL;type=VOICE;type=pref:{contact['phone1']}
 TEL;type=CELL;type=VOICE:{contact['phone2']}
-NOTE:{contact['position']}
 UID:e4aeda3b-aacf-42ea-8a2c-f35e7a0798f6
 X-ABUID:97AF7201-206D-47B7-973F-BEA9FB7F70C5:ABPerson
 END:VCARD'''
@@ -103,16 +104,21 @@ def xlsx_to_vcard(inputFile, outputFile):
 
 def converter(inputFile, outputFile):
     fileExtension = os.path.splitext(inputFile)[1]
-    if fileExtension == 'csv':
+    if fileExtension == '.csv':
         csv_to_vcard(inputFile, outputFile)
-    elif fileExtension == 'xlsx':
+    elif fileExtension == '.xlsx':
         xlsx_to_vcard(inputFile, outputFile)
     else:
         print(f'[-] Unsupported file extension: {inputFile}')
 
 
 def main():
-    converter()
+    parser = argparse.ArgumentParser(description='Create Vcard from CSV or XLSX files.')
+    parser.add_argument('-f', dest='inputFile', action='store', help='Input file contacts')
+    parser.add_argument('-o', dest='outputFile', action='store', help='Output vcard file')
+
+    args = parser.parse_args()
+    converter(args.inputFile, args.outputFile)
 
 
 if __name__ == '__main__':
